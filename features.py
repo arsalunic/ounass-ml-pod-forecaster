@@ -1,7 +1,8 @@
 # features.py
 def make_features(df):
+    
     # --- DEBUG 
-    print(">>> make_features IN:", df.shape)
+    # print(">>> make_features IN:", df.shape)
     
     df = df.sort_values('date').reset_index(drop=True).copy()
 
@@ -23,7 +24,7 @@ def make_features(df):
     ]
 
     # --- DEBUG
-    print(">>> make_features OUT:", df.shape)
+    # print(">>> make_features OUT:", df.shape)
 
     return df[feature_cols]
 
