@@ -25,7 +25,7 @@ def fetch_sheet():
             .astype(float)
         )
 
-    # 4. Constants for POD Estimation 
+    # 4. Constants for POD Estimation
     FE_USERS_PER_POD = 3800    # 1 frontend pod per 3800 users
     BE_GMV_PER_POD = 2_100_000  # 1 backend pod per $2.1M GMV
 
@@ -44,7 +44,6 @@ def fetch_sheet():
 
     # 6. Saving CLEANED DATA to SCV fotr investigation
     df.to_csv("cleaned_google_sheet.csv", index=False)
-
 
     return df
 

@@ -5,12 +5,12 @@ import pickle
 import numpy as np
 import pandas as pd
 from features import make_features
-from flask import Flask, request, jsonify
 from fetch_data import fetch_sheet
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# 1. Loading trained models
+# Loading trained models
 with open('models/pipe_fe.pkl', 'rb') as f:
     fe_model = pickle.load(f)
 with open('models/pipe_be.pkl', 'rb') as f:
@@ -37,7 +37,7 @@ def predict():
     input_budget = input_budget.dropna(
         subset=['date', 'gmv', 'users', 'marketing_cost'])
 
-    # Creating the full date range 
+    # Creating the full date range
     pred_start = pd.Timestamp('2024-07-01')
     pred_end = pd.Timestamp('2024-12-31')
     all_dates = pd.date_range(pred_start, pred_end, freq='D')
