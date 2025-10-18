@@ -1,21 +1,22 @@
 # fetch_data.py
-import pandas as pd
-import requests
+
 import io
+import requests
+import pandas as pd
 
 SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSKsxrQBqPOQdF_KOsD3ub81wynRnXX6Pw0BxRsDikzXZgEQOoEsTS0ILD7xnNNeBTOKd7xFCFmtsqM/pub?output=csv"
 
 
 def fetch_sheet():
-    # --- FETCH DATA FROM GOOGLE SHEET ---
+    # 1. Fetching the data from Google sheet
     resp = requests.get(SHEET_CSV_URL)
     resp.raise_for_status()
     df = pd.read_csv(io.StringIO(resp.text))
 
-    # --- CONVERT DATE COLUMN ---
+    # 2. Converting Data Column
     df['date'] = pd.to_datetime(df['date'], dayfirst=True, errors='coerce')
 
-    # --- CLEAN NUMERIC COLUMNS ---
+    # 3. Cleaning NUMERIC COLUMNS
     for col in ['gmv', 'users', 'marketing_cost']:
         df[col] = (
             df[col]
@@ -24,11 +25,11 @@ def fetch_sheet():
             .astype(float)
         )
 
-    # --- CONSTANTS FOR POD ESTIMATION ---
+    # 4. Constants for POD Estimation 
     FE_USERS_PER_POD = 3800    # 1 frontend pod per 3800 users
     BE_GMV_PER_POD = 2_100_000  # 1 backend pod per $2.1M GMV
 
-    # --- FILL PODS FOR HISTORICAL DATA ONLY ---
+    # 5. Filling pods fir Historical data only
     historical_mask = df['date'] < pd.to_datetime("2024-06-01")
 
     df.loc[historical_mask, 'fe_pods'] = df.loc[historical_mask, 'fe_pods'].fillna(
@@ -41,7 +42,7 @@ def fetch_sheet():
          BE_GMV_PER_POD).apply(lambda x: max(1, round(x)))
     ).astype(int)
 
-    # --- SAVE CLEANED DATA TO CSV FOR INSPECTION ---
+    # 6. Saving CLEANED DATA to SCV fotr investigation
     df.to_csv("cleaned_google_sheet.csv", index=False)
     # print("Cleaned data written to 'cleaned_google_sheet.csv'")
 

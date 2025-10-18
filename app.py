@@ -1,32 +1,34 @@
 # app.py
-from flask import Flask, request, jsonify
-import pickle
-import pandas as pd
+
 import math
+import pickle
 import numpy as np
+import pandas as pd
 from features import make_features
-from fetch_data import fetch_sheet  # fetch historical data
+from flask import Flask, request, jsonify
+from fetch_data import fetch_sheet
 
 app = Flask(__name__)
 
-# Load trained models
+# 1. Loading trained models
 with open('models/pipe_fe.pkl', 'rb') as f:
     fe_model = pickle.load(f)
 with open('models/pipe_be.pkl', 'rb') as f:
     be_model = pickle.load(f)
 
 
+# /predict API
 @app.route('/predict', methods=['POST', 'GET'])
 def predict():
     if request.method == 'GET':
         return jsonify({'status': 'ok'})  # health check
 
-    # --- READ INPUT BUDGET DATA ---
+    # Reading INPUT BUDGET data
     input_budget = pd.DataFrame(request.get_json(force=True).get('rows', []))
     if input_budget.empty:
         return jsonify({'error': 'provide rows as list of objects'}), 400
 
-    # --- CLEAN INPUT ---
+    # Cleaning the input
     input_budget['date'] = pd.to_datetime(input_budget['date'].astype(
         str).str.strip(), dayfirst=True, errors='coerce')
     for col in ['gmv', 'users', 'marketing_cost']:
@@ -35,23 +37,23 @@ def predict():
     input_budget = input_budget.dropna(
         subset=['date', 'gmv', 'users', 'marketing_cost'])
 
-    # --- CREATE FULL DATE RANGE ---
+    # Creating the full date range 
     pred_start = pd.Timestamp('2024-07-01')
     pred_end = pd.Timestamp('2024-12-31')
     all_dates = pd.date_range(pred_start, pred_end, freq='D')
     df_budget = pd.DataFrame({'date': all_dates})
 
-    # Merge input budget onto full date range
+    # Merging input budget onto full date range
     df_budget = df_budget.merge(input_budget, on='date', how='left')
 
-    # Fill missing numeric values (forward fill, then 0)
+    # Filling missing numeric values (forward fill, then 0)
     for col in ['gmv', 'users', 'marketing_cost']:
         if col in df_budget:
             df_budget[col] = df_budget[col].fillna(method='ffill').fillna(0)
 
     df_budget['is_budget'] = True
 
-    # --- HISTORICAL DATA ---
+    # Historical Data
     df_hist = fetch_sheet()
     df_hist = df_hist.dropna(subset=['fe_pods', 'be_pods'])
     df_hist['date'] = pd.to_datetime(
@@ -59,7 +61,7 @@ def predict():
     df_hist = df_hist.dropna(subset=['date'])
     df_hist['is_budget'] = False
 
-    # --- COMBINE FOR FEATURE ENGINEERING ---
+    # COMBINING FOR FEATURE ENGINEERING
     combined_df = pd.concat([df_hist, df_budget], ignore_index=True)
     combined_df = combined_df.sort_values('date').reset_index(drop=True)
 

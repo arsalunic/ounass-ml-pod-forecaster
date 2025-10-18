@@ -1,28 +1,24 @@
 # sheet_fetch_and_predict.py
 
-import requests
-import io
-import pandas as pd
-import json
 import re
+import io
+import json
+import requests
+import pandas as pd
 from dateutil import parser
 
 SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSKsxrQBqPOQdF_KOsD3ub81wynRnXX6Pw0BxRsDikzXZgEQOoEsTS0ILD7xnNNeBTOKd7xFCFmtsqM/pub?output=csv"
 API_URL = "http://127.0.0.1:8080/predict"
 
-# --------------------------
-# 1. Fetch the CSV
-# --------------------------
+
+# 1. Fetching the CSV
 resp = requests.get(SHEET_CSV_URL)
 resp.raise_for_status()
 df = pd.read_csv(io.StringIO(resp.text))
 print(f"\n CSV fetched successfully. Raw rows: {len(df)}")
 
-# --------------------------
+
 # 2. Robust date parsing
-# --------------------------
-
-
 def smart_parse_date(x):
     """Handle dates like '11/12/2024', strip quotes, and force day-first parsing."""
     s = str(x).strip().replace("'", "").replace('"', "")
@@ -43,9 +39,7 @@ print("Date range:", df['date'].min(), "→", df['date'].max())
 print("Total rows after date cleanup:", len(df))
 print("Unique months found:", sorted(df['date'].dt.month.unique()))
 
-# --------------------------
-# 3. Clean numeric columns
-# --------------------------
+# 3. Cleaning numeric columns
 for col in ['gmv', 'users', 'marketing_cost']:
     df[col] = (
         df[col]
@@ -58,9 +52,8 @@ for col in ['gmv', 'users', 'marketing_cost']:
 df = df.dropna(subset=['gmv', 'users', 'marketing_cost'])
 print(" Cleaned numeric columns. Remaining rows:", len(df))
 
-# --------------------------
-# 4. Filter July–Dec 2024
-# --------------------------
+
+# 4. Filtering July–Dec 2024
 start_date = pd.Timestamp('2024-07-01')
 end_date = pd.Timestamp('2024-12-31')
 
@@ -72,16 +65,12 @@ if budget_df.empty:
 print(
     f" Budget rows to send: {len(budget_df)} ({budget_df['date'].min()} → {budget_df['date'].max()})")
 
-# --------------------------
-# 5. Prepare for API
-# --------------------------
+# 5. Preparing for API
 rows = budget_df[['date', 'gmv', 'users', 'marketing_cost']].copy()
 rows['date'] = rows['date'].dt.strftime('%Y-%m-%d')
 rows = rows.to_dict(orient='records')
 
-# --------------------------
 # 6. POST request
-# --------------------------
 try:
     resp = requests.post(API_URL, json={'rows': rows})
     resp.raise_for_status()
