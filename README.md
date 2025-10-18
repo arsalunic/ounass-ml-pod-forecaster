@@ -217,6 +217,7 @@ Python 3.10+ recommended. Use a virtualenv to isolate installs.
 
 ## End-to-End Flow
 
+TODO:
 `
    [Google Sheets CSV]
         ↓
@@ -298,6 +299,7 @@ If later we find stronger time-seasonality patterns, we can hybridize with a tim
 
 ##  Visual Flow (Flow Diagram)
 
+TODO: 
  `
  
             Google Sheet (CSV)
