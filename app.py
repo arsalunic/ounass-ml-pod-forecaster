@@ -97,7 +97,6 @@ def predict():
             'be_pods': be_pred_budget[i]
         })
 
-    print("Total predictions to return:", len(out))
     return jsonify({'predictions': out})
 
 

@@ -1,9 +1,6 @@
 # features.py
 def make_features(df):
     
-    # --- DEBUG 
-    # print(">>> make_features IN:", df.shape)
-    
     df = df.sort_values('date').reset_index(drop=True).copy()
 
     # Date-based features
@@ -22,9 +19,6 @@ def make_features(df):
         'day_of_week', 'day_of_month', 'is_weekend', 'month',
         'gmv_7d_avg', 'users_7d_avg', 'marketing_7d_avg'
     ]
-
-    # --- DEBUG
-    # print(">>> make_features OUT:", df.shape)
 
     return df[feature_cols]
 

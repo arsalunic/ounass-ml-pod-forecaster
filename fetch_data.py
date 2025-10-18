@@ -44,7 +44,7 @@ def fetch_sheet():
 
     # 6. Saving CLEANED DATA to SCV fotr investigation
     df.to_csv("cleaned_google_sheet.csv", index=False)
-    # print("Cleaned data written to 'cleaned_google_sheet.csv'")
+
 
     return df
 

@@ -19,13 +19,6 @@ with open('models/pipe_be.pkl', 'rb') as f:
 # 2. Fetching cleaned historical data
 df_clean = pd.read_csv("cleaned_google_sheet.csv")
 
-#  DEBUG
-# print("\n Data loaded from cleaned_google_sheet.csv")
-# print("Total rows loaded (raw):", len(df_clean))
-# print("Date range (raw):", df_clean['date'].min(), "→", df_clean['date'].max())
-# print("Columns:", list(df_clean.columns))
-# print("\nSample rows:\n", df_clean.head(10))
-# print("\nTail rows:\n", df_clean.tail(10))
 
 # Checking for rows with null dates before they were dropped
 raw_df = df_clean.copy()
@@ -48,7 +41,7 @@ df_clean = df_clean.sort_values('date').reset_index(drop=True)
 print("\n After cleaning:")
 print("Total valid rows:", len(df_clean))
 print("Date range (cleaned):",
-      df_clean['date'].min(), "→", df_clean['date'].max())
+      df_clean['date'].min(), ":", df_clean['date'].max())
 print("Total budget rows in CSV:", df_clean[(df_clean['date'] >= BUDGET_START_DATE) &
                                             (df_clean['date'] <= BUDGET_END_DATE)].shape[0])
 
