@@ -10,13 +10,13 @@ from features import make_features
 BUDGET_START_DATE = pd.Timestamp('2024-07-01')
 BUDGET_END_DATE = pd.Timestamp('2024-12-31')
 
-# 1. Loading trained models
+# Loading trained models
 with open('models/pipe_fe.pkl', 'rb') as f:
     fe_model = pickle.load(f)
 with open('models/pipe_be.pkl', 'rb') as f:
     be_model = pickle.load(f)
 
-# 2. Fetching cleaned historical data
+# Fetching cleaned historical data
 df_clean = pd.read_csv("cleaned_google_sheet.csv")
 
 
@@ -45,7 +45,7 @@ print("Date range (cleaned):",
 print("Total budget rows in CSV:", df_clean[(df_clean['date'] >= BUDGET_START_DATE) &
                                             (df_clean['date'] <= BUDGET_END_DATE)].shape[0])
 
-# 3. Filtering budget rows
+# Filtering budget rows
 df_budget = df_clean[(df_clean['date'] >= BUDGET_START_DATE) &
                      (df_clean['date'] <= BUDGET_END_DATE)].copy()
 
@@ -57,18 +57,18 @@ df_budget['is_budget'] = True
 df_hist = df_clean[df_clean['date'] < BUDGET_START_DATE].copy()
 df_hist['is_budget'] = False
 
-# 4. Combining historical + budget
+# Combining historical + budget
 combined_df = pd.concat([df_hist, df_budget], ignore_index=True)
 combined_df = combined_df.sort_values('date').reset_index(drop=True)
 
-# 5. Feature engineering
+# Feature engineering
 X_combined = make_features(combined_df)
 X_combined = X_combined.reset_index(drop=True)
 
 # Masking for budget rows
 budget_mask = combined_df['is_budget'].values
 
-# 6. Predictions
+# Predictions
 fe_pred_all = fe_model.predict(X_combined)
 be_pred_all = be_model.predict(X_combined)
 
@@ -84,7 +84,7 @@ be_pred_budget = [
     for x in be_pred_budget
 ]
 
-# 7. Output
+# Output
 df_budget_out = df_budget.copy()
 df_budget_out['fe_pods'] = fe_pred_budget
 df_budget_out['be_pods'] = be_pred_budget

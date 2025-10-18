@@ -1,6 +1,6 @@
 # features.py
 def make_features(df):
-    
+
     df = df.sort_values('date').reset_index(drop=True).copy()
 
     # Date-based features
@@ -9,10 +9,11 @@ def make_features(df):
     df['is_weekend'] = (df['day_of_week'] >= 5).astype(int)
     df['month'] = df['date'].dt.month
 
-    # Rolling features (ensure no leakage across unrelated segments)
+    # Rolling features (this ensures no leakage across unrelated segments)
     df['gmv_7d_avg'] = df['gmv'].rolling(7, min_periods=1).mean()
     df['users_7d_avg'] = df['users'].rolling(7, min_periods=1).mean()
-    df['marketing_7d_avg'] = df['marketing_cost'].rolling(7, min_periods=1).mean()
+    df['marketing_7d_avg'] = df['marketing_cost'].rolling(
+        7, min_periods=1).mean()
 
     feature_cols = [
         'gmv', 'users', 'marketing_cost',
@@ -21,4 +22,3 @@ def make_features(df):
     ]
 
     return df[feature_cols]
-
