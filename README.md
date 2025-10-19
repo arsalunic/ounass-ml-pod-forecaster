@@ -215,24 +215,63 @@ Python 3.10+ recommended. Use a virtualenv to isolate installs.
 
 ---
 
-## End-to-End Flow
+## Model Calibration (June Constants)
 
-TODO:
-`
-   [Google Sheets CSV]
-        ↓
-   fetch_data.py  → cleaned_google_sheet.csv
-        ↓
-   train_models.py → models/pipe_fe.pkl + pipe_be.pkl
-        ↓
-   app.py → Flask API (/predict)
-        ↓
-   sheet_fetch_and_predict.py → posts budget rows → gets predictions
-        ↓
-   predict_local.py → offline CSV output
-`
+Before training and forecasting, I performed a quick calibration step using actual June data to make sure our simple rule-based pod estimation formulas were realistic.
+
+### Original Formulas
+
+I started with:
+
+FE_pods = users / FE_USERS_PER_POD  
+
+BE_pods = GMV / BE_GMV_PER_POD
+
+  
+
+These formulas assume I can estimate the required number of frontend and backend pods based on user count and GMV, respectively.
+
+### Adjusting Constants from June Data
+
+I computed new constants so the formulas match real June pod usage on average.
+
+Frontend constant
+
+FE_USERS_PER_POD = mean(users / FE_pods)
+
+
+Backend constant
+
+BE_GMV_PER_POD = mean(GMV / BE_pods)
+
+
+### June Data Snapshot (June 16–30)
+
+|   |   |   |   |   |
+|---|---|---|---|---|
+|Date|GMV|Users|FE Pods|BE Pods|
+|16/06|19,364,132|74,540|20|9|
+|17/06|18,558,648|73,152|20|9|
+|…|…|…|…|…|
+|30/06|19,191,123|86,558|20|9|
+
+From these values:
+
+- users / fe_pods averaged ≈ 3,800 users per FE pod
+- GMV / be_pods averaged ≈ 2,100,000 GMV per BE pod  
+
+
+### Updated Constants
+
+FE_USERS_PER_POD = 3800       # ~1 frontend pod per 3.8 K users
+BE_GMV_PER_POD   = 2_100_000  # ~1 backend pod per $2.1 M GMV
+
+**
+
+
 
 ---
+
 
 ## How to run locally
 
@@ -296,25 +335,3 @@ If later we find stronger time-seasonality patterns, we can hybridize with a tim
     
 
 ---
-
-##  Visual Flow (Flow Diagram)
-
-TODO: 
- `
- 
-            Google Sheet (CSV)
-                 ↓
-            fetch_data.py
-                 ↓
-            cleaned_google_sheet.csv
-                 ↓
-            train_models.py → models/*.pkl
-                ↓
-            app.py (Flask API)
-                ↑
-           sheet_fetch_and_predict.py  ← budget rows
-                ↓
-          predicted_budget_pods.csv (local output)
-    
- 
- `
