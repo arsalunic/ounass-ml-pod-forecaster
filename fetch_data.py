@@ -44,7 +44,7 @@ def fetch_sheet():
                 .apply(lambda x: max(1, round(x))))
     )
 
-    # 👇 Force integer dtype (no floats in CSV)
+    # Force integer dtype (no floats in CSV)
     df['fe_pods'] = df['fe_pods'].round().astype('Int64')
     df['be_pods'] = df['be_pods'].round().astype('Int64')
 
