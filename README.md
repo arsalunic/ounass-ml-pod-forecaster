@@ -5,7 +5,7 @@ The idea is to help DevOps plan capacity _before_ spikes hit production.
 
 ---
 
-## What this project does (Quick Summary)
+## What this project does 
 
 This repo connects to a Google Sheet (with both historical and budgeted data), cleans it up, builds features, trains two Random Forest models to predict FE and BE pods, and exposes an API endpoint `/predict` that returns daily pod forecasts for upcoming budget periods (July–Dec 2024).
 
@@ -55,7 +55,7 @@ Transform the cleaned data into something machine-learning-friendly.
 DataFrame with columns like `date`, `gmv`, `users`, `marketing_cost`, and optional `fe_pods`, `be_pods`.
 
 **Outputs:**  
-A new DataFrame with added feature columns — same number of rows, same order.
+A new DataFrame with added feature columns - same number of rows, same order.
 
 **Features generated:**
 
