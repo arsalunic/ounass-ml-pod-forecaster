@@ -15,7 +15,6 @@ API_URL = "http://127.0.0.1:8080/predict"
 resp = requests.get(SHEET_CSV_URL)
 resp.raise_for_status()
 df = pd.read_csv(io.StringIO(resp.text))
-print(f"\n CSV fetched successfully. Raw rows: {len(df)}")
 
 
 # Robust date parsing
@@ -34,11 +33,6 @@ df['date'] = df['date'].apply(smart_parse_date)
 df = df.dropna(subset=['date'])
 df = df.sort_values('date').reset_index(drop=True)
 
-print(" Dates parsed successfully.")
-print("Date range:", df['date'].min(), "→", df['date'].max())
-print("Total rows after date cleanup:", len(df))
-print("Unique months found:", sorted(df['date'].dt.month.unique()))
-
 # Cleaning numeric columns
 for col in ['gmv', 'users', 'marketing_cost']:
     df[col] = (
@@ -50,7 +44,6 @@ for col in ['gmv', 'users', 'marketing_cost']:
     df[col] = pd.to_numeric(df[col], errors='coerce')
 
 df = df.dropna(subset=['gmv', 'users', 'marketing_cost'])
-print(" Cleaned numeric columns. Remaining rows:", len(df))
 
 
 # Filtering July–Dec 2024
@@ -61,9 +54,6 @@ budget_df = df[(df['date'] >= start_date) & (df['date'] <= end_date)].copy()
 if budget_df.empty:
     print(" No budget rows found to predict. Exiting.")
     exit()
-
-print(
-    f" Budget rows to send: {len(budget_df)} ({budget_df['date'].min()} → {budget_df['date'].max()})")
 
 # Preparing for API
 rows = budget_df[['date', 'gmv', 'users', 'marketing_cost']].copy()
