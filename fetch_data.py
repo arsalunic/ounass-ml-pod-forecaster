@@ -32,15 +32,21 @@ def fetch_sheet():
     # 5. Filling pods fir Historical data only
     historical_mask = df['date'] < pd.to_datetime("2024-06-01")
 
-    df.loc[historical_mask, 'fe_pods'] = df.loc[historical_mask, 'fe_pods'].fillna(
-        (df.loc[historical_mask, 'users'] /
-         FE_USERS_PER_POD).apply(lambda x: max(1, round(x)))
-    ).astype(int)
+    df.loc[historical_mask, 'fe_pods'] = (
+        df.loc[historical_mask, 'fe_pods']
+        .fillna((df.loc[historical_mask, 'users'] / FE_USERS_PER_POD)
+                .apply(lambda x: max(1, round(x))))
+    )
 
-    df.loc[historical_mask, 'be_pods'] = df.loc[historical_mask, 'be_pods'].fillna(
-        (df.loc[historical_mask, 'gmv'] /
-         BE_GMV_PER_POD).apply(lambda x: max(1, round(x)))
-    ).astype(int)
+    df.loc[historical_mask, 'be_pods'] = (
+        df.loc[historical_mask, 'be_pods']
+        .fillna((df.loc[historical_mask, 'gmv'] / BE_GMV_PER_POD)
+                .apply(lambda x: max(1, round(x))))
+    )
+
+    # 👇 Force integer dtype (no floats in CSV)
+    df['fe_pods'] = df['fe_pods'].round().astype('Int64')
+    df['be_pods'] = df['be_pods'].round().astype('Int64')
 
     # 6. Saving CLEANED DATA to SCV fotr investigation
     df.to_csv("cleaned_google_sheet.csv", index=False)
