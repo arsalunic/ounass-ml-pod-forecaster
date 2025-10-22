@@ -13,7 +13,7 @@ def fetch_sheet():
     resp.raise_for_status()
     df = pd.read_csv(io.StringIO(resp.text))
 
-    # 2. Converting Data Column
+    # 2. Converting Date Column
     df['date'] = pd.to_datetime(df['date'], dayfirst=True, errors='coerce')
 
     # 3. Cleaning NUMERIC COLUMNS
@@ -26,10 +26,11 @@ def fetch_sheet():
         )
 
     # 4. Constants for POD Estimation
+    # To better understand why we used these constants, please have a look at the README
     FE_USERS_PER_POD = 3800    # 1 frontend pod per 3800 users
     BE_GMV_PER_POD = 2_100_000  # 1 backend pod per $2.1M GMV
 
-    # 5. Filling pods fir Historical data only
+    # 5. Filling pods for Historical data only (until start of June)
     historical_mask = df['date'] < pd.to_datetime("2024-06-01")
 
     df.loc[historical_mask, 'fe_pods'] = (
@@ -48,7 +49,8 @@ def fetch_sheet():
     df['fe_pods'] = df['fe_pods'].round().astype('Int64')
     df['be_pods'] = df['be_pods'].round().astype('Int64')
 
-    # 6. Saving CLEANED DATA to SCV fotr investigation
+    # 6. Saving CLEANED DATA to SCV for investigation
+    # We may use this cleaned file later during our ML process
     df.to_csv("cleaned_google_sheet.csv", index=False)
 
     return df

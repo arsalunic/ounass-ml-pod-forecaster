@@ -16,7 +16,8 @@ with open('models/pipe_fe.pkl', 'rb') as f:
 with open('models/pipe_be.pkl', 'rb') as f:
     be_model = pickle.load(f)
 
-# Fetching cleaned historical data
+# Fetching cleaned historical data:
+# Make sure the cleaned_google_sheet.csv is available in the directory
 df_clean = pd.read_csv("cleaned_google_sheet.csv")
 
 
@@ -38,6 +39,7 @@ df_clean = df_clean.dropna(subset=['date'])
 # Sorting chronologically
 df_clean = df_clean.sort_values('date').reset_index(drop=True)
 
+print("#-------- DEBUG-------#")
 print("\n After cleaning:")
 print("Total valid rows:", len(df_clean))
 print("Date range (cleaned):",
@@ -96,5 +98,6 @@ df_budget_out = df_budget_out.sort_values('date').reset_index(drop=True)
 print(df_budget_out[['date', 'fe_pods', 'be_pods']])
 
 # Saving to CSV
-df_budget_out.to_csv('predicted_budget_pods.csv', index=False)
+df_budget_out[['date', 'gmv', 'users', 'marketing_cost', 'fe_pods',
+               'be_pods']].to_csv('predicted_budget_pods.csv', index=False)
 print("\nPredictions saved to 'predicted_budget_pods.csv'")
